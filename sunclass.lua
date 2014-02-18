@@ -25,7 +25,7 @@
 --------------------------------------------------------------------------------
 
 _R = {}
-function class(name, ...)
+local function class(name, ...)
 
     if _R[name] then
         return _R[name]
