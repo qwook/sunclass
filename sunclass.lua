@@ -35,7 +35,8 @@ function class(name, ...)
 
     class.__index = function(s, k)
         if (k) == "super" then return setmetatable({},
-        { __index =
+        {
+        __index =
             function(fake, k)
                 local sp_array = class.__super
                 for _, _sp in pairs(sp_array) do
@@ -45,10 +46,18 @@ function class(name, ...)
                     end
                     if type(sp[k]) == "function" then
                         return function(fake, ...)
-                            return sp[k](s, ...)
+                            local olindex = class.__index
+                            class.__index = sp.__index
+                            local ret = sp[k](s, ...)
+                            class.__index = olindex
+                            return ret
                         end
                     end
                 end
+            end;
+        __tostring =
+            function()
+                return "class Super of " .. class.__classname
             end
         })
     end
@@ -63,7 +72,8 @@ function class(name, ...)
         end
     end
     return class[k] end
-    class.new = function(s, ...) local n = {} local o = setmetatable(n, s) o:initialize(...) return o end
+    class.new = function(s, ...) local n = {} local o = setmetatable(n, s) if o.initialize then o:initialize(...) end return o end
+    class.__tostring = function() return "class " .. class.__classname end
     class.__classname = name
     class.__super = {...} -- put other super classes here
 
