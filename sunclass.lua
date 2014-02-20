@@ -25,57 +25,66 @@
 --------------------------------------------------------------------------------
 
 _R = {}
+
 local function class(name, ...)
 
+    -- if this class already exists, just load it up.
     if _R[name] then
         return _R[name]
     end
 
-    local class = {} -- put functions here
+    local class = {}
 
     class.__index = function(s, k)
-        if (k) == "super" then return setmetatable({},
-        {
-        __index =
-            function(fake, k)
-                local sp_array = class.__super
-                for _, _sp in pairs(sp_array) do
-                    local sp = _sp
-                    while (sp[k] == nil and sp.__super) do
-                        sp = sp.__super
-                    end
-                    if type(sp[k]) == "function" then
-                        return function(fake, ...)
-                            local olindex = class.__index
-                            class.__index = sp.__index
-                            local ret = sp[k](s, ...)
-                            class.__index = olindex
-                            return ret
+        -- create a fake object for accessing superclass methods
+        if (k) == "super" then
+            return setmetatable({},
+            {
+            __index =
+                function(fake, k)
+                    local sp_array = class.__super
+                    for _, _sp in pairs(sp_array) do
+                        local sp = _sp
+                        while (sp[k] == nil and sp.__super) do
+                            sp = sp.__super
+                        end
+                        if type(sp[k]) == "function" then
+                            return function(fake, ...)
+                                local olindex = class.__index
+                                class.__index = sp.__index
+                                local ret = {sp[k](s, ...)}
+                                class.__index = olindex
+                                return unpack(ret)
+                            end
                         end
                     end
+                end;
+            __tostring =
+                function()
+                    return "class Super of " .. class.__classname
                 end
-            end;
-        __tostring =
-            function()
-                return "class Super of " .. class.__classname
-            end
-        })
-    end
+            })
+        end
 
-    if class[k] == nil then
-        local sp_array = class.__super
-        for _, sp in pairs(sp_array) do
-            local ret = sp.__index(s, k)
-            if ret ~= nil then
-                return ret
+        -- loop through super classes / mixins
+        if class[k] == nil then
+            local sp_array = class.__super
+            for _, sp in pairs(sp_array) do
+                local ret = sp.__index(s, k)
+                if ret ~= nil then
+                    return ret
+                end
             end
         end
+
+        -- return normally
+        return class[k]
     end
-    return class[k] end
+
     class.new = function(s, ...) local n = {} local o = setmetatable(n, s) if o.initialize then o:initialize(...) end return o end
     class.__tostring = function() return "class " .. class.__classname end
     class.__classname = name
-    class.__super = {...} -- put other super classes here
+    class.__super = {...}
 
     _R[name] = class
 
