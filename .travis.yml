@@ -17,8 +17,8 @@ install:
 script: "busted spec"
 
 notifications:
-  recipients:
-    - henryquoctran@gmail.com
   email:
+    recipients:
+      - henryquoctran@gmail.com
     on_success: change
     on_failure: always
