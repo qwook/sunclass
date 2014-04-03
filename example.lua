@@ -1,5 +1,6 @@
-
-
+--
+-- This is a quick example project using sunclass
+--
 
 class = require("sunclass")
 
@@ -16,6 +17,7 @@ local Mixin = class("Mixin")
 function Mixin:print()
     print("This will never be called")
 end
+
 function Mixin:print2()
     print("Called a mixin")
 end
