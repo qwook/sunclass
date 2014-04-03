@@ -35,6 +35,7 @@ local function class(name, ...)
 
     local class = {}
 
+    -- class index access
     class.__index = function(s, k)
         -- create a fake object for accessing superclass methods
         if (k) == "super" then
@@ -66,7 +67,7 @@ local function class(name, ...)
             })
         end
 
-        -- loop through super classes / mixins
+        -- loop through super classes / mixins to find what we're looking for
         if class[k] == nil then
             local sp_array = class.__super
             for _, sp in pairs(sp_array) do
@@ -80,11 +81,36 @@ local function class(name, ...)
         -- return normally
         return class[k]
     end
+    -- end class index access
 
     class.new = function(s, ...) local n = {} local o = setmetatable(n, s) if o.initialize then o:initialize(...) end return o end
     class.__tostring = function() return "class " .. class.__classname end
     class.__classname = name
     class.__super = {...}
+
+    class.instanceOf = function( self, c )
+        local mt = getmetatable(self)
+        if mt == c then return true else
+            -- using a queue, go through each of the supers
+            -- try to match up a super with the given class c
+            local supers = {}
+            for k, v in pairs(mt.__super) do
+                table.insert(supers, v)
+            end
+            while (#supers > 0) do
+                for i = 1, #supers do
+                    local mt = supers[1]
+                    if c == mt then return true end
+                    for k, v in pairs(mt.__super) do
+                        table.insert(supers, v)
+                    end
+                    table.remove(supers, 1)
+                end
+            end
+        end
+
+        return false 
+    end
 
     _R[name] = class
 
