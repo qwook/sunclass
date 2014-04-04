@@ -1,4 +1,4 @@
-package = "SunClass"
+package = "Sunclass"
 version = "1.0-0"
 source = {
     url = "git://github.com/qwook/sunclass",
