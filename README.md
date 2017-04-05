@@ -46,7 +46,7 @@ Documentation
 ## Class inheritance and invoking super methods.
 
 	-- definition of a super class
-	local SuperClass = class("SimpleClass")
+	local SuperClass = class("SuperClass")
 	
 	function SuperClass:classMethod()
 	end
@@ -67,7 +67,7 @@ You can actually have an unlimited number of inheritances
 	function Mixin:randomFunction()
 	end
 
-	-- definition of a class that derives off of two other classes.
+	-- definition of a class that derives off of another class and has a mixin.
 	local SimpleClass = class("SimpleClass", SuperClass, Mixin)
 	
 	function SimpleClass:classMethod()
